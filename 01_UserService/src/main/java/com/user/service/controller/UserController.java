@@ -3,6 +3,7 @@ package com.user.service.controller;
 import com.user.service.dto.UserDto;
 import com.user.service.entity.User;
 import com.user.service.services.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -41,7 +42,7 @@ public class UserController {
     }
 
     @PutMapping("/update/{userId}")
-    public ResponseEntity<User> updateUser(@PathVariable String userId, @RequestBody UserDto userDetails) {
+    public ResponseEntity<User> updateUser(@PathVariable String userId, @Valid @RequestBody UserDto userDetails) {
         User updatedUser = userService.updateUser(userId, userDetails);
         return ResponseEntity.ok(updatedUser);
     }

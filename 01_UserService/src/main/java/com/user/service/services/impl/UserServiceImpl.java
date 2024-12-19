@@ -1,5 +1,6 @@
 package com.user.service.services.impl;
 
+import com.user.service.dto.UserDto;
 import com.user.service.entity.Hotel;
 import com.user.service.entity.Rating;
 import com.user.service.entity.User;
@@ -11,7 +12,6 @@ import com.user.service.services.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.UUID;
@@ -21,9 +21,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
-
     private final UserRepository userRepository;
-  //  private final RestTemplate restTemplate;
     private final HotelService hotelService;
     private final RatingService ratingService;
 
@@ -82,7 +80,7 @@ public class UserServiceImpl implements UserService {
 
         List<Rating> ratings = ratingService.getAllRatingsByUserId(userId);
         log.info("Ratings fetched: {}", ratings);
-
+// TODO LEARN ABOUT FUNCTIONAL PROGRAMMING AS WELL
         List<Rating> hotelRatingList = ratings.stream().peek(rating -> {
             Hotel hotel = hotelService.getHotel(rating.getHotelId());
             rating.setHotel(hotel);
@@ -93,20 +91,26 @@ public class UserServiceImpl implements UserService {
         return user;
     }
 
+    //    TODO Remove Entity from  payload and use  DTO also learn about validation  using  jakarta
     @Override
-    public User updateUser(String userId, User user) {
+    public User updateUser(String userId, UserDto userDto) {
         User existingUser = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("user does not exist with this id"));
 
-        existingUser.setName(user.getName());
-        existingUser.setEmail(user.getEmail());
-        existingUser.setGender(user.getGender());
+        existingUser.setName(userDto.getName());
+        existingUser.setEmail(userDto.getEmail());
+        existingUser.setGender(userDto.getGender());
 
         return userRepository.save(existingUser);
     }
 
     @Override
     public void deleteUser(String userId) {
-        userRepository.deleteById(userId);
-    }
+//        TODO : APPLY EXCEPTION handling here
+        User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + userId));
+
+        userRepository.delete(user);
+        }
+
 }

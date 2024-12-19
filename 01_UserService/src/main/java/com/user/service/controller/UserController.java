@@ -1,5 +1,6 @@
 package com.user.service.controller;
 
+import com.user.service.dto.UserDto;
 import com.user.service.entity.User;
 import com.user.service.services.UserService;
 import lombok.RequiredArgsConstructor;
@@ -40,7 +41,7 @@ public class UserController {
     }
 
     @PutMapping("/update/{userId}")
-    public ResponseEntity<User> updateUser(@PathVariable String userId, @RequestBody User userDetails) {
+    public ResponseEntity<User> updateUser(@PathVariable String userId, @RequestBody UserDto userDetails) {
         User updatedUser = userService.updateUser(userId, userDetails);
         return ResponseEntity.ok(updatedUser);
     }

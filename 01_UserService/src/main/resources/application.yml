@@ -19,12 +19,44 @@ spring:
   config:
     import: optional:configserver:http://localhost:8085
 
-#eureka:
-#  instance:
-#    prefer-ip-address: true
-#
-#  client:
-#    fetch-registry: true
-#    register-with-eureka: true
-#    service-url:
-#      defaultZone: http://localhost:8761/eureka
+# Actuator Configurations
+management:
+  health:
+    circuitbreakers:
+      enabled: true
+
+  endpoints:
+    web:
+      exposure:
+        include: health, circuitbreakers, metrics, info
+
+  endpoint:
+    health:
+      show-details: always
+
+# Resilience4j Circuit Breaker Configurations
+resilience4j:
+  circuitbreaker:
+    instances:
+      RatingHotelBreaker:
+        # Enable health indicator for Resilience4j circuit breakers
+        registerHealthIndicator: true
+        # Defines failure rate threshold
+        failureRateThreshold: 80  # Open the circuit breaker when failure rate exceeds 50%
+        # Defines the threshold for slow calls
+        slowCallRateThreshold: 80  # Open circuit breaker if 50% calls are slow
+        slowCallDurationThreshold: 5s  # Call duration exceeding 2 seconds is considered slow
+        minimumNumberOfCalls: 5  # Minimum number of calls before considering failure rate
+        waitDurationInOpenState: 10s  # Time the circuit breaker stays open before transitioning to half-open
+        ringBufferSizeInClosedState: 10  # Buffer size for closed state
+        ringBufferSizeInHalfOpenState: 5  # Number of calls allowed in half-open state
+        slidingWindowSize: 10  # Sliding window size for counting calls
+        slidingWindowType: COUNT_BASED  # Defines how the sliding window is managed
+        automaticTransitionFromOpenToHalfOpenEnabled: true  # Allows automatic transition from open to half-open
+
+
+logging:
+  level:
+    io.github.resilience4j.circuitbreaker: DEBUG
+
+

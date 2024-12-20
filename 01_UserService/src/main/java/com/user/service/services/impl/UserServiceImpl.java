@@ -9,8 +9,11 @@ import com.user.service.client.HotelService;
 import com.user.service.client.RatingService;
 import com.user.service.repository.UserRepository;
 import com.user.service.services.UserService;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -74,6 +77,7 @@ public class UserServiceImpl implements UserService {
 //    }
 
     @Override
+    @CircuitBreaker(name = "RatingHotelBreaker", fallbackMethod = "ratingHotelFallbackMethod")
     public User getUserById(String userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with this id: " + userId));
@@ -88,6 +92,18 @@ public class UserServiceImpl implements UserService {
 
         user.setRating(hotelRatingList);
 
+        return user;
+    }
+
+    public User ratingHotelFallbackMethod(String userId, Throwable ex) {
+        log.info("Fallback executed because the service is down or an error occurred: {}", ex.getMessage());
+
+        // Create a fallback response (a default User object)
+        User user = new User();
+        user.setUserId(userId);
+        user.setName("Fallback User: because service is down");
+        user.setEmail("######");
+        user.setGender("######");
         return user;
     }
 
